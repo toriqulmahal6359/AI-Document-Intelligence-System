@@ -12,7 +12,7 @@ An AI-assisted document intelligence application designed to process business do
 | Vector Search | pgvector |
 | Background Tasks | RabbitMQ, Dramatiq |
 | PDF Processing | PyMuPDF |
-| OCR | Tesseract OCR, OpenCV, Pillow |
+| OCR | Tesseract OCR, RapidOCR, OpenCV, Pillow |
 | Spreadsheet Processing | pandas, openpyxl, xlrd |
 | Local AI | Ollama |
 
