@@ -1,0 +1,33 @@
+date,description,debit,credit,balance
+2026-08-01,Salary - Example Traders (fictional),,62500.00,110730.55
+2026-08-01,Rent - standing order,18500.00,,92230.55
+2026-08-02,UPI - Corner Cafe,245.00,,91985.55
+2026-08-03,Electricity bill - Sampleton Power,1872.40,,90113.15
+2026-08-04,UPI - Fresh Greens Market,1134.50,,88978.65
+2026-08-05,ATM withdrawal - Specimen Bank,3000.00,,85978.65
+2026-08-06,Mobile recharge,399.00,,85579.65
+2026-08-07,UPI - Book Nook,680.00,,84899.65
+2026-08-08,Refund - Online Store Example,,1299.00,86198.65
+2026-08-09,Fuel - Highway Pumps,2400.00,,83798.65
+2026-08-10,SIP - Specimen Mutual Fund,5000.00,,78798.65
+2026-08-11,UPI - Corner Cafe,310.00,,78488.65
+2026-08-12,Insurance premium - Example Assurance,2150.00,,76338.65
+2026-08-13,UPI - Fresh Greens Market,968.20,,75370.45
+2026-08-14,Transfer from Alex Example,,4000.00,79370.45
+2026-08-15,Internet - Sampleton Fibre,799.00,,78571.45
+2026-08-16,UPI - Pharmacy Example,452.75,,78118.70
+2026-08-17,Dinner - Spice Route,1860.00,,76258.70
+2026-08-18,UPI - Corner Cafe,190.00,,76068.70
+2026-08-19,Water bill - Sampleton Municipal,415.00,,75653.70
+2026-08-20,ATM withdrawal - Specimen Bank,2000.00,,73653.70
+2026-08-21,Gym membership - Fit Example,1500.00,,72153.70
+2026-08-22,UPI - Fresh Greens Market,1412.30,,70741.40
+2026-08-23,Interest credit,,112.48,70853.88
+2026-08-24,Cinema - Example Screens,640.00,,70213.88
+2026-08-25,Fuel - Highway Pumps,2100.00,,68113.88
+2026-08-26,UPI - Book Nook,325.00,,67788.88
+2026-08-27,Credit card payment - Specimen Bank,9874.60,,57914.28
+2026-08-28,UPI - Corner Cafe,275.00,,57639.28
+2026-08-29,Transfer to savings,10000.00,,47639.28
+2026-08-30,UPI - Fresh Greens Market,887.90,,46751.38
+2026-08-31,SMS alerts charge,15.00,,46736.38

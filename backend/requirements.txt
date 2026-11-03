@@ -1,0 +1,35 @@
+# API
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+pydantic-settings
+python-dotenv
+
+# Database and migrations
+sqlalchemy
+psycopg[binary]
+alembic
+pgvector
+
+# Background processing
+dramatiq[rabbitmq]
+celery[redis]
+redis
+
+# Document processing
+pymupdf
+pytesseract
+opencv-python-headless
+pillow
+pandas
+openpyxl
+xlrd
+
+# AI integration and HTTP
+requests
+tenacity
+
+# Testing
+pytest
+httpx

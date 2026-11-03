@@ -1,0 +1,45 @@
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+app.env
+frontend/.env.local
+
+# Python virtual environments
+.venv/
+venv/
+env/
+backend/.env/
+
+# Python cache and test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Runtime storage
+backend/storage/
+
+# Logs
+*.log
+
+# Node.js and Next.js
+node_modules/
+.next/
+out/
+build/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# IDE and operating system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.pem
