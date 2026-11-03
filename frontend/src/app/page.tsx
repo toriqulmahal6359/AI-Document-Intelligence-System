@@ -48,6 +48,9 @@ export default function Home() {
   const [verifyFile1, setVerifyFile1] = useState<File | null>(null);
   const [verifyFile2, setVerifyFile2] = useState<File | null>(null);
 
+  const [verifyCategory1, setVerifyCategory1] = useState("invoice");
+  const [verifyCategory2, setVerifyCategory2] = useState("invoice");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [searchMode, setSearchMode] = useState<"keyword" | "semantic">(
     "keyword"
@@ -142,6 +145,7 @@ export default function Home() {
               >
                 <option value="invoice">Invoice</option>
                 <option value="bank_statement">Bank Statement</option>
+                <option value="receipt">Receipt</option>
                 {/* <option value="bank_statement">Reciept</option> */}
                 {/* <option value="identity">Identity Document</option> */}
                 {/* <option value="contract">Contract</option> */}
@@ -184,7 +188,7 @@ export default function Home() {
         </section>
 
         {/* Verification */}
-        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        {/* <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold">2. Verify Documents</h2>
           <p className="mt-1 text-sm text-gray-500">
             Compare two documents using the verification API.
@@ -226,6 +230,87 @@ export default function Home() {
 
               execute("Document Verification", () =>
                 verifyDocuments(verifyFile1, verifyFile2, category)
+              );
+            }}
+          >
+            Verify Documents
+          </button>
+        </section> */}
+
+        {/* Verification */}
+        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold">2. Verify Documents</h2>
+          <p className="mt-1 text-sm text-gray-500">
+            Compare two documents using the verification API.
+          </p>
+
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                First Document
+              </label>
+              <input
+                type="file"
+                className={inputClass}
+                onChange={(e) =>
+                  setVerifyFile1(e.target.files?.[0] || null)
+                }
+              />
+
+              <label className="mb-2 mt-3 block text-sm font-medium">
+                First Document Category
+              </label>
+              <select
+                className={inputClass}
+                value={verifyCategory1}
+                onChange={(e) => setVerifyCategory1(e.target.value)}
+              >
+                <option value="invoice">Invoice</option>
+                <option value="bank_statement">Bank Statement</option>
+                <option value="receipt">Receipt</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Second Document
+              </label>
+              <input
+                type="file"
+                className={inputClass}
+                onChange={(e) =>
+                  setVerifyFile2(e.target.files?.[0] || null)
+                }
+              />
+
+              <label className="mb-2 mt-3 block text-sm font-medium">
+                Second Document Category
+              </label>
+              <select
+                className={inputClass}
+                value={verifyCategory2}
+                onChange={(e) => setVerifyCategory2(e.target.value)}
+              >
+                <option value="invoice">Invoice</option>
+                <option value="bank_statement">Bank Statement</option>
+                <option value="receipt">Receipt</option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            className={`${buttonClass} mt-4`}
+            disabled={loading || !verifyFile1 || !verifyFile2}
+            onClick={() => {
+              if (!verifyFile1 || !verifyFile2) return;
+
+              execute("Document Verification", () =>
+                verifyDocuments(
+                  verifyFile1,
+                  verifyFile2,
+                  verifyCategory1,
+                  verifyCategory2
+                )
               );
             }}
           >

@@ -11,6 +11,7 @@ from app.processors.image_processor import extract_image_text
 from app.processors.spreadsheet_processor import process_spreadsheet
 
 from app.services.extraction_service import extract_invoice
+from app.services.receipt_extraction_service import extract_receipt
 
 from app.services.bank_statement_extraction_service import (
     extract_bank_statement_from_spreadsheet,
@@ -32,6 +33,8 @@ from app.services.bank_statement_ai_extraction_service import (
 from app.services.bank_statement_validation_service import (
     validate_bank_statement,
 )
+
+from app.services.receipt_validation_service import validate_receipt
 
 
 SUPPORTED_EXTENSIONS = {
@@ -72,7 +75,11 @@ def process_document(
 
     if extension == ".pdf":
 
-        result = extract_pdf_text(str(path))
+        # result = extract_pdf_text(str(path))
+        result = extract_pdf_text(
+            str(path),
+            document_category=document_category,
+        )
         document_type = "pdf"
 
     # elif extension in {
@@ -129,7 +136,12 @@ def process_document(
         else:
 
             # Preserve existing image extraction for other document types.
-            extracted_text = extract_image_text(str(path))
+            # extracted_text = extract_image_text(str(path))
+
+            extracted_text = extract_image_text(
+                str(path),
+                document_category=document_category,
+            )
 
             result = {
                 "filename": path.name,
@@ -180,6 +192,56 @@ def process_document(
         invoice = extract_invoice(document_text)
 
         ai_extraction = invoice.model_dump(mode="json")
+
+    # elif document_category == "receipt":
+
+    #     if document_type == "spreadsheet":
+
+    #         import json
+
+    #         document_text = json.dumps(
+    #             result["sheets"],
+    #             default=str,
+    #             ensure_ascii=False,
+    #         )
+
+    #     else:
+    #         document_text = result.get("full_text", "")
+
+    #     receipt = extract_receipt(document_text)
+
+    #     ai_extraction = receipt.model_dump(mode="json")
+
+    #     status = (
+    #         "requires_review"
+    #         if receipt.requires_review
+    #         else "completed"
+    #     )
+    
+    elif document_category == "receipt":
+        document_text = (
+            json.dumps(result["sheets"], ensure_ascii=False)
+            if extension in [".xlsx", ".xls", ".csv"]
+            else result["full_text"]
+        )
+
+        receipt = extract_receipt(document_text)
+
+        validation = validate_receipt(receipt)
+
+        if validation["requires_review"]:
+            receipt.requires_review = True
+            receipt.review_reason = list(dict.fromkeys(
+                receipt.review_reason + validation["errors"]
+            ))
+
+        ai_extraction = receipt.model_dump(mode="json")
+
+        status = (
+            "requires_review"
+            if receipt.requires_review
+            else "completed"
+        )
 
     # elif document_category == "bank_statement":
 

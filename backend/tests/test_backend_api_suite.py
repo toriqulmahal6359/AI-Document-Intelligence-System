@@ -391,7 +391,11 @@ def main() -> int:
                     "document_1": ("one.pdf", b"%PDF-test", "application/pdf"),
                     "document_2": ("two.pdf", b"%PDF-test", "application/pdf"),
                 },
-                data={"document_category": "unsupported"},
+                # data={"document_category": "unsupported"},
+                data={
+                    "document_1_category": "unsupported",
+                    "document_2_category": "invoice",
+                },
             )
             assert response.status_code == 400, response.text
             return "Unsupported category rejected with HTTP 400"
@@ -404,7 +408,11 @@ def main() -> int:
                     "document_1": ("one.exe", b"bad", "application/octet-stream"),
                     "document_2": ("two.pdf", b"%PDF-test", "application/pdf"),
                 },
-                data={"document_category": "invoice"},
+                # data={"document_category": "invoice"},
+                data={
+                    "document_1_category": "invoice",
+                    "document_2_category": "invoice",
+                },
             )
             assert response.status_code == 400, response.text
             return "Unsupported verification file rejected with HTTP 400"

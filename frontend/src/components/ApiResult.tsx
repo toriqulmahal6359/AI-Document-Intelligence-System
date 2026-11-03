@@ -1,5 +1,6 @@
 import InvoiceDetails from "./InvoiceDetails";
 import BankStatementDetails from "./BankStatementDetails";
+import ReceiptDetails from "./ReceiptDetails";
 
 type Props = {
   title: string;
@@ -133,8 +134,13 @@ export default function ApiResult({ title, data }: Props) {
                 <BankStatementDetails data={root} />
             )}
 
+            {root.document_category === "receipt" && (
+                <ReceiptDetails data={root} />
+            )}
+
             {root.document_category !== "invoice" &&
-                root.document_category !== "bank_statement" && (
+                root.document_category !== "bank_statement" && 
+                  root.document_category !== "receipt" && (
                     <p className="text-sm text-gray-500">
                         No document-specific display is available for this category.
                     </p>

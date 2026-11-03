@@ -545,23 +545,43 @@ async def upload_documents(
 async def verify_uploaded_documents(
     document_1: UploadFile = File(...),
     document_2: UploadFile = File(...),
-    document_category: str = Form(...),
+    document_1_category: str = Form(...),
+    document_2_category: str = Form(...),
     db: Session = Depends(get_db),
 ):
-    category = document_category.strip().lower()
+    category_1 = document_1_category.strip().lower()
+    category_2 = document_2_category.strip().lower()
 
-    if category not in {"invoice", "bank_statement"}:
+    supported_categories = {"invoice", "bank_statement", "receipt"}
+
+    if category_1 not in supported_categories:
         raise HTTPException(
             status_code=400,
-            detail="Category must be 'invoice' or 'bank_statement'."
+            detail=f"Unsupported first document category: {category_1}"
         )
 
-    uploaded_files = [document_1, document_2]
+    if category_2 not in supported_categories:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported second document category: {category_2}"
+        )
+
+    # Determine the comparison strategy.
+    verification_category = (
+        category_1
+        if category_1 == category_2
+        else f"{category_1}_{category_2}"
+    )
+
+    uploaded_files = [
+        (document_1, category_1),
+        (document_2, category_2),
+    ]
+
     saved_files = []
 
     try:
-        # Save and process both documents.
-        for uploaded_file in uploaded_files:
+        for uploaded_file, document_category in uploaded_files:
             original_name = uploaded_file.filename or "unnamed"
             extension = Path(original_name).suffix.lower()
 
@@ -582,10 +602,9 @@ async def verify_uploaded_documents(
 
             processing_result = process_document(
                 str(saved_path),
-                document_category=category,
+                document_category=document_category,
             )
 
-            # Persist the individual document and processing job.
             persist_document_result(
                 db=db,
                 document_id=document_id,
@@ -594,12 +613,13 @@ async def verify_uploaded_documents(
                 file_size_bytes=file_size_bytes,
                 processing_result=processing_result,
                 file_type=extension,
-                document_category=category,
+                document_category=document_category,
             )
 
             saved_files.append({
                 "document_id": document_id,
                 "filename": original_name,
+                "document_category": document_category,
                 "processing_result": processing_result,
             })
 
@@ -607,17 +627,16 @@ async def verify_uploaded_documents(
         verification_result = verify_documents(
             saved_files[0]["processing_result"],
             saved_files[1]["processing_result"],
-            document_category=category,
+            document_category=verification_category,
             document_1_name=saved_files[0]["filename"],
             document_2_name=saved_files[1]["filename"],
         )
 
-        # Persist the verification record.
         verification_record = CrossDocumentVerification(
             verification_id=str(uuid4()),
             document_1_id=saved_files[0]["document_id"],
             document_2_id=saved_files[1]["document_id"],
-            document_category=category,
+            document_category=verification_category,
             verification_status=verification_result["verification_status"],
             verification_result=jsonable_encoder(verification_result),
         )
@@ -626,11 +645,12 @@ async def verify_uploaded_documents(
         db.commit()
 
         return {
-            "document_category": category,
+            "document_category": verification_category,
             "documents": [
                 {
                     "document_id": item["document_id"],
                     "filename": item["filename"],
+                    "document_category": item["document_category"],
                     "processing_status": item["processing_result"]["status"],
                 }
                 for item in saved_files
@@ -651,8 +671,121 @@ async def verify_uploaded_documents(
         ) from exc
 
     finally:
-        for uploaded_file in uploaded_files:
+        for uploaded_file, _ in uploaded_files:
             await uploaded_file.close()
+
+# @router.post("/verify")
+# async def verify_uploaded_documents(
+#     document_1: UploadFile = File(...),
+#     document_2: UploadFile = File(...),
+#     document_category: str = Form(...),
+#     db: Session = Depends(get_db),
+# ):
+#     category = document_category.strip().lower()
+
+#     if category not in {"invoice", "bank_statement"}:
+#         raise HTTPException(
+#             status_code=400,
+#             detail="Category must be 'invoice' or 'bank_statement'."
+#         )
+
+#     uploaded_files = [document_1, document_2]
+#     saved_files = []
+
+#     try:
+#         # Save and process both documents.
+#         for uploaded_file in uploaded_files:
+#             original_name = uploaded_file.filename or "unnamed"
+#             extension = Path(original_name).suffix.lower()
+
+#             if extension not in SUPPORTED_EXTENSIONS:
+#                 raise HTTPException(
+#                     status_code=400,
+#                     detail=f"Unsupported file format: {extension}"
+#                 )
+
+#             document_id = str(uuid4())
+#             saved_path = UPLOAD_DIR / f"{document_id}{extension}"
+
+#             with saved_path.open("wb") as destination:
+#                 while chunk := await uploaded_file.read(1024 * 1024):
+#                     destination.write(chunk)
+
+#             file_size_bytes = saved_path.stat().st_size
+
+#             processing_result = process_document(
+#                 str(saved_path),
+#                 document_category=category,
+#             )
+
+#             # Persist the individual document and processing job.
+#             persist_document_result(
+#                 db=db,
+#                 document_id=document_id,
+#                 filename=original_name,
+#                 stored_path=str(saved_path),
+#                 file_size_bytes=file_size_bytes,
+#                 processing_result=processing_result,
+#                 file_type=extension,
+#                 document_category=category,
+#             )
+
+#             saved_files.append({
+#                 "document_id": document_id,
+#                 "filename": original_name,
+#                 "processing_result": processing_result,
+#             })
+
+#         # Perform cross-document verification.
+#         verification_result = verify_documents(
+#             saved_files[0]["processing_result"],
+#             saved_files[1]["processing_result"],
+#             document_category=category,
+#             document_1_name=saved_files[0]["filename"],
+#             document_2_name=saved_files[1]["filename"],
+#         )
+
+#         # Persist the verification record.
+#         verification_record = CrossDocumentVerification(
+#             verification_id=str(uuid4()),
+#             document_1_id=saved_files[0]["document_id"],
+#             document_2_id=saved_files[1]["document_id"],
+#             document_category=category,
+#             verification_status=verification_result["verification_status"],
+#             verification_result=jsonable_encoder(verification_result),
+#         )
+
+#         db.add(verification_record)
+#         db.commit()
+
+#         return {
+#             "document_category": category,
+#             "documents": [
+#                 {
+#                     "document_id": item["document_id"],
+#                     "filename": item["filename"],
+#                     "processing_status": item["processing_result"]["status"],
+#                 }
+#                 for item in saved_files
+#             ],
+#             "verification_id": verification_record.verification_id,
+#             "verification": verification_result,
+#         }
+
+#     except HTTPException:
+#         db.rollback()
+#         raise
+
+#     except Exception as exc:
+#         db.rollback()
+#         raise HTTPException(
+#             status_code=422,
+#             detail=f"Document verification failed: {exc}"
+#         ) from exc
+
+#     finally:
+#         for uploaded_file in uploaded_files:
+#             await uploaded_file.close()
 
 
 # @router.post("/verify")

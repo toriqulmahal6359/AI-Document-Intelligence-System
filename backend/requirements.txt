@@ -33,3 +33,6 @@ tenacity
 # Testing
 pytest
 httpx
+
+#image runtime
+rapidocr_onnxruntime

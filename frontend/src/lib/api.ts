@@ -26,6 +26,38 @@ export interface InvoiceCorrection {
   line_items: InvoiceLineItem[];
 }
 
+// async function request<T = ApiResponse>(
+//   path: string,
+//   options: RequestInit = {}
+// ): Promise<T> {
+//   const response = await fetch(`${API_BASE_URL}${path}`, options);
+
+//   const contentType = response.headers.get("content-type") || "";
+//   let result: unknown = null;
+
+//   if (response.status !== 204) {
+//     result = contentType.includes("application/json")
+//       ? await response.json()
+//       : await response.text();
+//   }
+
+//   if (!response.ok) {
+//     const message =
+//       typeof result === "object" &&
+//       result !== null &&
+//       "detail" in result
+//         ? String((result as { detail: unknown }).detail)
+//         : typeof result === "string" && result
+//           ? result
+//           : `Request failed (${response.status})`;
+
+//     throw new Error(message);
+//   }
+
+//   return result as T;
+// }
+
+
 async function request<T = ApiResponse>(
   path: string,
   options: RequestInit = {}
@@ -46,10 +78,12 @@ async function request<T = ApiResponse>(
       typeof result === "object" &&
       result !== null &&
       "detail" in result
-        ? String((result as { detail: unknown }).detail)
+        ? typeof (result as { detail: unknown }).detail === "string"
+          ? (result as { detail: string }).detail
+          : JSON.stringify((result as { detail: unknown }).detail, null, 2)
         : typeof result === "string" && result
           ? result
-          : `Request failed (${response.status})`;
+          : JSON.stringify(result) || `Request failed (${response.status})`;
 
     throw new Error(message);
   }
@@ -77,16 +111,36 @@ export async function uploadDocuments(
 }
 
 // 2. Verify Uploaded Documents
+// export async function verifyDocuments(
+//   document1: File,
+//   document2: File,
+//   documentCategory: string
+// ) {
+//   const formData = new FormData();
+
+//   formData.append("document_1", document1);
+//   formData.append("document_2", document2);
+//   formData.append("document_category", documentCategory);
+
+//   return request("/api/documents/verify", {
+//     method: "POST",
+//     body: formData,
+//   });
+// }
+
+// 2. Verify Uploaded Documents
 export async function verifyDocuments(
   document1: File,
   document2: File,
-  documentCategory: string
+  document1Category: string,
+  document2Category: string
 ) {
   const formData = new FormData();
 
   formData.append("document_1", document1);
   formData.append("document_2", document2);
-  formData.append("document_category", documentCategory);
+  formData.append("document_1_category", document1Category);
+  formData.append("document_2_category", document2Category);
 
   return request("/api/documents/verify", {
     method: "POST",

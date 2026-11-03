@@ -10,7 +10,11 @@ pytesseract.pytesseract.tesseract_cmd = os.getenv(
 )
 
 
-def extract_pdf_text(file_path: str) -> dict:
+# def extract_pdf_text(file_path: str) -> dict:
+def extract_pdf_text(
+    file_path: str,
+    document_category: str | None = None,
+) -> dict:
     path = Path(file_path)
 
     if not path.exists():
@@ -43,7 +47,11 @@ def extract_pdf_text(file_path: str) -> dict:
                 # OCR only when embedded text is insufficient.
                 if len(text) < 30:
                     pixmap = page.get_pixmap(
-                        matrix=fitz.Matrix(2, 2),
+                        # matrix=fitz.Matrix(2, 2),
+                        matrix=fitz.Matrix(
+                            3 if document_category == "receipt" else 2,
+                            3 if document_category == "receipt" else 2,
+                        ),
                         colorspace=fitz.csGRAY,
                         alpha=False,
                     )
@@ -56,7 +64,12 @@ def extract_pdf_text(file_path: str) -> dict:
 
                     text = pytesseract.image_to_string(
                         image,
-                        config="--oem 3 --psm 3",
+                        # config="--oem 3 --psm 3",
+                        config=(
+                            "--oem 3 --psm 6"
+                            if document_category == "receipt"
+                            else "--oem 3 --psm 3"
+                        ),
                     ).strip()
 
                     extraction_method = "ocr"
